@@ -17,11 +17,11 @@ const LinkSchema = new mongoose.Schema({
   expirationTime: {
     type: Date,
   },
-  ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
+  // ownerId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User',
+  //   required: true,
+  // },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -4,7 +4,10 @@ const PORT = process.env.PORT || 5000;
 const express = require('express');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoute');
+const linkRoutes = require('./routes/linkRoutes.js');
 
+
+// **
 const app = express();
 
 // Middleware
@@ -16,9 +19,13 @@ connectDB();
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/link', linkRoutes);
 
 
 
+
+
+// 
 app.get('/',(req, res)=>{
     res.send("Sharelinks is running")
 })
