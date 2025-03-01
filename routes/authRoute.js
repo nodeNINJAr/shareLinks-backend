@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const authMiddleware = require('../middleware/authMIddleware');
 const router = express.Router();
 
 // Register a new user
@@ -12,21 +13,50 @@ router.post('/register', async (req, res) => {
     if(existingUser){
       return res.status(409).json({message:"User already exists"})
     }
-
     const newUser = new User({userName , email, password});
     await newUser.save();
     // 
-    const token = jwt.sign({ id: newUser._id, email:newUser.email }, process.env.JWT_SECRET, {
-       expiresIn: '1h',
-     });
-    res.status(201).json({ token , newUser});
-
-
   }catch(error){
     res.status(500).json({message:"Server error" , error: error.message});
   }
 
 });
+
+// ** Sign in to jwt
+router.post('/login', async(req, res)=> {
+  const {uid, email,} = req?.body;
+  // 
+  const token = jwt.sign({userId:uid, email }, process.env.JWT_SECRET, {
+    expiresIn: '1h',
+  });
+  // Set the token to cookkie
+   res.cookie('token',token,{
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 3600000,
+      sameSite: 'strict', 
+   })
+  //  
+  res.status(201).json({ token});
+})
+
+
+// ** Token remove from the cookie
+router.post('/logout',authMiddleware, async(req,res)=>{
+  try {
+     // Clear the token cookie
+     res.clearCookie('token', {
+       httpOnly: true,
+       secure: process.env.NODE_ENV === 'production',
+       sameSite: 'strict',
+     });
+ 
+     res.status(200).json({ message: 'Logout successful' });
+   } catch (err) {
+     console.error('Error during logout:', err);
+     res.status(500).json({ message: 'Server error during logout' });
+   }
+})
 
 
 module.exports = router;
