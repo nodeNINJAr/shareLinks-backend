@@ -22,6 +22,90 @@ router.post('/register', async (req, res) => {
 
 });
 
+
+    // ** Get the link
+    // router.get('/:linkId', async (req, res) => {
+    //   const { linkId } = req.params;
+    //   // 
+    //   try {
+    //     // Find the link by ID
+    //     const link = await Link.findById(linkId);
+    //     if (!link) {
+    //       return res.status(404).json({ message: 'Link not found' });
+    //     }
+    
+    //     // Check if the link is private
+    //     if (link.accessType === 'private') {
+    //       // Check if the user is authenticated (e.g., via JWT)
+    //       // if (!req.user || link.ownerId.toString() !== req.user.id) {
+    //       //   return res.status(403).json({ message: 'Authentication required' });
+    //       // }
+    //     }
+    
+    //     // Return the link content
+    //     res.status(200).json({ content: link.content });
+    //   } catch (err) {
+    //     res.status(500).json({ message: 'Server error', error: err.message });
+    //   }
+    // });
+  
+  // ** Update the link content
+  // router.put('/:linkId', async (req, res) => {
+  //     const { linkId } = req.params;
+  //     const { content, accessType, password, expirationTime } = req.body;
+    
+  //     try {
+  //       // Find the link by ID
+  //       const link = await Link.findById(linkId);
+  //       if (!link) {
+  //         return res.status(404).json({ message: 'Link not found' });
+  //       }
+    
+  //       // Check if the user is the owner of the link
+  //       // if (link.ownerId.toString() !== req.user.id) {
+  //       //   return res.status(403).json({ message: 'Unauthorized' });
+  //       // }
+    
+  //       // Update the link
+  //       link.content = content || link.content;
+  //       link.accessType = accessType || link.accessType;
+  //       link.password = password || link.password;
+  //       link.expirationTime = expirationTime || link.expirationTime;
+    
+  //       await link.save();
+  //       res.status(200).json({ message: 'Link updated', link });
+  //     } catch (err) {
+  //       res.status(500).json({ message: 'Server error', error: err.message });
+  //     }
+  //   });
+  
+   // ** Delete the link content
+  
+  // router.delete('/:linkId', async (req, res) => {
+  //     const { linkId } = req.params;
+    
+  //     try {
+  //       // Find the link by ID
+  //       const link = await Link.findById(linkId);
+  //       if (!link) {
+  //         return res.status(404).json({ message: 'Link not found' });
+  //       }
+    
+  //       // Check if the user is the owner of the link
+  //       // if (link.ownerId.toString() !== req.user.id) {
+  //       //   return res.status(403).json({ message: 'Unauthorized' });
+  //       // }
+    
+  //       // Delete the link
+  //       await Link.deleteOne({ _id: linkId });
+  //       res.status(200).json({ message: 'Link deleted' });
+  //     } catch (err) {
+  //       res.status(500).json({ message: 'Server error', error: err.message });
+  //     }
+  //   });
+
+
+
 // ** Sign in to jwt
 router.post('/login', async(req, res)=> {
   const {uid, email,} = req?.body;

@@ -1,32 +1,14 @@
 const mongoose = require('mongoose');
 
-// 
 const LinkSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-  },
-  accessType: {
-    type: String,
-    enum: ['public', 'private'],
-    default: 'public',
-  },
-  password: {
-    type: String,
-  },
-  expirationTime: {
-    type: Date,
-  },
-  // ownerId: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'User',
-  //   required: true,
-  // },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  uniqueID: { type: String, unique: true, required: true },
+  content: { type: String }, // Can store text or file data (Base64)
+  contentType: { type: String },
+  filePath: { type: String }, // Optional: Store file path if saving files to disk
+  accessType: { type: String, enum: ['public', 'private'], default: 'public' },
+  password: { type: String },
+  expirationTime: { type: Date },
+  createdAt: { type: Date, default: Date.now },
 });
-
 
 module.exports = mongoose.model('Link', LinkSchema);
