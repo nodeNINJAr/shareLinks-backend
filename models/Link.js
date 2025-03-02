@@ -9,6 +9,7 @@ const LinkSchema = new mongoose.Schema({
   password: { type: String },
   expirationTime: { type: Date },
   createdAt: { type: Date, default: Date.now },
+  userId:{ type: String }
 });
 
 module.exports = mongoose.model('Link', LinkSchema);

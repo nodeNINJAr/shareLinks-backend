@@ -11,7 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Generate a shareable link with text or file data
 router.post('/generate', upload.single('file'), async (req, res) => {
   // 
-  const { text, accessType, password, expirationTime } = req.body;
+  const { text, accessType, password, expirationTime,userId } = req.body;
   const file = req.file;
 
   if (!text && !file) {
@@ -40,6 +40,7 @@ router.post('/generate', upload.single('file'), async (req, res) => {
       accessType,
       password,
       expirationTime,
+      userId,
     });
 
     await newLink.save();
@@ -49,12 +50,11 @@ router.post('/generate', upload.single('file'), async (req, res) => {
   }
 });
 
-
 // ** Get the link content
 router.get('/:linkId', async (req, res) => {
   const { linkId } = req.params;
   const { password } = req.query; 
-
+  //  
   try {
     // Find the link by uniqueID
     const link = await Link.findOne({ uniqueID: linkId });
@@ -76,7 +76,7 @@ router.get('/:linkId', async (req, res) => {
         return res.status(403).json({ message: 'Incorrect password' });
       }
     }
-
+     
     // ** Decode the Base64 content
     const contentBuffer = Buffer.from(link.content, 'base64');
 
@@ -99,5 +99,50 @@ router.get('/:linkId', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
+// ** Get the link
+router.get('/person/:uid', async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    // Find the links by userId
+    const links = await Link.find({ userId: uid }).sort({ createdAt: -1 });
+
+    // Check if no links were found
+    if (links.length === 0) {
+      return res.status(404).json({ message: 'No links found for this user' });
+    }
+
+    // Return the found links
+    res.status(200).json(links);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+    
+// ** Delete the link content
+router.delete('/:linkId', async (req, res) => {
+    const { linkId } = req.params;
+  
+    try {
+      // Find the link by ID
+      const link = await Link.findById(linkId);
+      if (!link) {
+        return res.status(404).json({ message: 'Link not found' });
+      }
+  
+      // Check if the user is the owner of the link
+      // if (link.ownerId.toString() !== req.user.id) {
+      //   return res.status(403).json({ message: 'Unauthorized' });
+      // }
+  
+      // Delete the link
+      await Link.deleteOne({ _id: linkId });
+      res.status(200).json({ message: 'Link deleted' });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  });
+
 
 module.exports = router;
