@@ -18,9 +18,9 @@ router.post('/generate', upload.single('file'), async (req, res) => {
   const file = req.file;
   
   // Check if the user is the owner of the link
-  if (userId.toString() !== req.user?.userId) {
-    return res.status(403).json({ message: 'Unauthorized' });
-  }
+  // if (userId.toString() !== req.user?.userId) {
+  //   return res.status(403).json({ message: 'Unauthorized' });
+  // }
   // 
   if (!text && !file) {
     return res.status(400).json({ message: 'Either text or file is required' });
@@ -52,7 +52,7 @@ router.post('/generate', upload.single('file'), async (req, res) => {
     });
 
     await newLink.save();
-    res.status(201).json({ linkId: newLink.uniqueID, shareableLink: `https://sharelink-a9df9.web.app/${newLink.uniqueID}` });
+    res.status(201).json({ linkId: newLink.uniqueID, shareableLink: `https://sharelinks-backend.onrender.com/link/${newLink.uniqueID}` });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
