@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const Link = require('../models/Link');
 const { default: mongoose } = require('mongoose');
 const authMiddleware = require('../middleware/authMIddleware');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -57,33 +58,48 @@ router.post('/generate',authMiddleware, upload.single('file'), async (req, res) 
   }
 });
 
+
+
+
 // ** Get the link content
 router.get('/:linkId', async (req, res) => {
   const { linkId } = req.params;
-  const { password } = req.query; 
+  const { password } = req.query;
+  const token = req.cookies.token; 
   //  
   try {
-    // Find the link by uniqueID
+ 
     const link = await Link.findOne({ uniqueID: linkId });
     if (!link) {
       return res.status(404).json({ message: 'Link not found' });
     }
-
-    // Check if the link has expired
+    // 
     if (link.expirationTime && new Date() > link.expirationTime) {
       return res.status(410).json({ message: 'Link has expired' });
     }
-    
     // Check if the link is private
     if (link.accessType === 'private') {
+      let isAuthenticated = false;
+      // 
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          isAuthenticated = true;
+        } catch (err) {
+          console.error('Invalid or expired token:', err);
+        }
+      }
+     // If the user is not authenticated, require a password
+     if (!isAuthenticated) {
       if (!password) {
-        return res.status(401).json({ message: 'Password is required' });
+        return res.status(401).json({ message: 'Authentication or password is required' });
       }
       if (password !== link.password) {
         return res.status(403).json({ message: 'Incorrect password' });
       }
     }
-     
+    }
+
     // ** Decode the Base64 content
     const contentBuffer = Buffer.from(link.content, 'base64');
 
@@ -105,6 +121,8 @@ router.get('/:linkId', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
+
 
 // ** Get the link
 router.get('/person/:uid',authMiddleware, async (req, res) => {

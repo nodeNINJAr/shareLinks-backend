@@ -1,7 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const authMiddleware = require('../middleware/authMIddleware');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // Register a new user
@@ -13,7 +13,11 @@ router.post('/register', async (req, res) => {
     if(existingUser){
       return res.status(409).json({message:"User already exists"})
     }
-    const newUser = new User({userName , email, password});
+
+    // Hash the PIN
+    const hashedPass = await bcrypt.hash(password.toString(), 10);
+    // 
+    const newUser = new User({userName , email, password:hashedPass, isLogin:true});
     await newUser.save();
     // 
   }catch(error){
@@ -30,6 +34,7 @@ router.post('/login', async(req, res)=> {
   const token = jwt.sign({userId:uid, email }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
+  
   // Set the token to cookkie
    res.cookie('token',token,{
       httpOnly: true, 
