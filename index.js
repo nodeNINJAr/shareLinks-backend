@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin:[ 'http://localhost:5173','https://sharelink-a9df9.web.app','https://sharelink-a9df9.firebaseapp.com'],
   credentials: true, 
 }));
 

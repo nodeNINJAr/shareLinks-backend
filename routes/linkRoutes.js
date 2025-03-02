@@ -12,7 +12,7 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Generate a shareable link with text or file data
-router.post('/generate',authMiddleware, upload.single('file'), async (req, res) => {
+router.post('/generate', upload.single('file'), async (req, res) => {
   // 
   const { text, accessType, password, expirationTime,userId } = req.body;
   const file = req.file;
@@ -52,7 +52,7 @@ router.post('/generate',authMiddleware, upload.single('file'), async (req, res) 
     });
 
     await newLink.save();
-    res.status(201).json({ linkId: newLink.uniqueID, shareableLink: `http://localhost:5000/link/${newLink.uniqueID}` });
+    res.status(201).json({ linkId: newLink.uniqueID, shareableLink: `https://sharelink-a9df9.web.app/${newLink.uniqueID}` });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
