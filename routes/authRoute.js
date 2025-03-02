@@ -23,7 +23,6 @@ router.post('/register', async (req, res) => {
 });
 
 
-
 // ** Sign in to jwt
 router.post('/login', async(req, res)=> {
   const {uid, email} = req?.body;

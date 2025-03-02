@@ -5,14 +5,16 @@ const express = require('express');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoute');
 const linkRoutes = require('./routes/linkRoutes.js');
+const cookieParser = require('cookie-parser');
 
 
 // **
 const app = express();
 
 // Middleware
-app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
 
 // Connect to database
 connectDB();

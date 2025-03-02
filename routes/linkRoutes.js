@@ -3,6 +3,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const Link = require('../models/Link');
 const { default: mongoose } = require('mongoose');
+const authMiddleware = require('../middleware/authMIddleware');
 
 const router = express.Router();
 
@@ -10,12 +11,16 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Generate a shareable link with text or file data
-router.post('/generate', upload.single('file'), async (req, res) => {
+router.post('/generate',authMiddleware, upload.single('file'), async (req, res) => {
   // 
   const { text, accessType, password, expirationTime,userId } = req.body;
   const file = req.file;
-  console.log(file);
-
+  
+  // Check if the user is the owner of the link
+  if (userId.toString() !== req.user?.userId) {
+    return res.status(403).json({ message: 'Unauthorized' });
+  }
+  // 
   if (!text && !file) {
     return res.status(400).json({ message: 'Either text or file is required' });
   }
@@ -63,8 +68,6 @@ router.get('/:linkId', async (req, res) => {
     if (!link) {
       return res.status(404).json({ message: 'Link not found' });
     }
-    
- console.log(link.expirationTime && new Date() > link.expirationTime);
 
     // Check if the link has expired
     if (link.expirationTime && new Date() > link.expirationTime) {
@@ -104,17 +107,12 @@ router.get('/:linkId', async (req, res) => {
 });
 
 // ** Get the link
-router.get('/person/:uid', async (req, res) => {
+router.get('/person/:uid',authMiddleware, async (req, res) => {
   const { uid } = req.params;
   // 
   try {
     // Find the links by userId
     const links = await Link.find({ userId: uid }).sort({ createdAt: -1 });
-
-    // Check if no links were found
-    if (links.length === 0) {
-      return res.status(404).json({ message: 'No links found for this user' });
-    }
     // 
     const convertedLinks = links.map(link => {
       let contentString = '';
@@ -133,14 +131,18 @@ router.get('/person/:uid', async (req, res) => {
 });
     
 // ** Delete the link content
-router.delete('/:linkId', async (req, res) => {
+router.delete('/:linkId',authMiddleware, async (req, res) => {
     const { linkId } = req.params;
     // 
     try {
       // Find the link by ID
       const link = await Link.findById(linkId);
       if (!link) {
-        return res.status(404).json({ message: 'Link not found' });
+        return 
+      }
+      // Check if the user is the owner of the link
+      if (link.userId.toString() !== req.user?.userId) {
+        return res.status(403).json({ message: 'Unauthorized' });
       }
   
       // Delete the link
@@ -152,7 +154,7 @@ router.delete('/:linkId', async (req, res) => {
   });
 
 // ** Update the link content
-router.patch('/:linkId/update', upload.single('file'), async (req, res) => {
+router.patch('/:linkId/update',authMiddleware, upload.single('file'), async (req, res) => {
     const { linkId } = req.params;
     const { textContent, accessType, password, expirationTime } = req.body;
     const file = req.file;
@@ -164,11 +166,15 @@ router.patch('/:linkId/update', upload.single('file'), async (req, res) => {
     // 
     try {
      const existingLink = await Link.findById(linkId);
-
-      if (!existingLink) {
-        return res.status(404).json({ message: 'Link not found' });
+      // Check if the user is the owner of the link
+      if (existingLink.userId.toString() !== req.user?.userId) {
+        return res.status(403).json({ message: 'Unauthorized' });
       }
-
+      //  
+      if (!existingLink) {
+        return 
+      }
+     
     let content
     let contentType
 
